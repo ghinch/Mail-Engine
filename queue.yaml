@@ -1,0 +1,4 @@
+queue:
+- name: mailqueue
+  rate: 2000/d
+  bucket_size: 10

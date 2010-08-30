@@ -1,0 +1,16 @@
+application: mailengine
+version: 1
+runtime: python
+api_version: 1
+
+handlers:
+- url: /
+  script: main.py
+
+- url: /mailbox
+  script: worker.py
+  login: admin
+
+- url: /dispatch
+  script: dispatch.py
+  login: admin
