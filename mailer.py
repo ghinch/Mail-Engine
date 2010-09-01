@@ -52,17 +52,15 @@ class Mailbox(webapp.RequestHandler):
 		return
 
 	def post(self):
-		
 		args = self.request.arguments()
 		args.sort()
 		params = {}
 		for arg in args:
-			if arg != TOKEN:
-				params[arg] = self.request.get(arg)
+			params[arg] = self.request.get(arg)
 
-		token = self.request.get(TOKEN)
+		token = self.request.headers['Mail-Engine-Auth-Token']
 
-		if auth.check(token, urllib.urlencode(params)):
+		if auth.check(token, urllib.urlencode(params), self.request.remote_addr):
 			logging.debug('adding message to queue')
 			taskqueue.add(url='/mailbox', method=POST, params=params)
 		else:
