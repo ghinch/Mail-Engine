@@ -1,16 +1,27 @@
-application: mailengine
-version: 1
+application: tmdmailer
+version: dev 
 runtime: python
 api_version: 1
 
 handlers:
 - url: /
   script: main.py
+  login: admin
 
-- url: /mailbox
-  script: worker.py
+- url: /post
+  script: main.py
+
+- url: /build
+  script: main.py
   login: admin
 
 - url: /dispatch
-  script: dispatch.py
+  script: main.py
   login: admin
+
+- url: /messages
+  script: main.py
+  login: admin
+
+- url: /.*
+  script: main.py

@@ -1,0 +1,200 @@
+{% extends 'base.html' %}
+{% block css %}
+<style type="text/css">
+	#header, #footer {
+		padding: 1em 3em;
+	}
+	#header h3 {
+		color: #c00;
+	}
+	#content {
+		padding: 0 3em;
+	}
+	#content table {
+		width: 100%;
+	}
+
+	#content fieldset div {
+		padding: 1em;
+		background-color: #fff;
+		margin: 0.25em;
+	}
+
+	#content fieldset legend {
+		font-style: italic;
+		font-size: 90%;
+		padding: 0.5em;
+	}
+
+	#content fieldset div label,
+	#content fieldset div em {
+		width: 20%;
+		display: inline-block;
+		vertical-align: top;
+		padding-top: 0.4em;
+	}
+
+	#content fieldset div em {
+		margin-left: 1em;
+	}
+
+	#content fieldset div input,
+	#content fieldset div textarea {
+		width: 20em;
+		border: 0.1em solid #333;
+		padding: 0.3em;
+		-moz-border-radius: 0.25em;
+		-webkit-border-radius: 0.25em;
+	}
+
+	#content fieldset div .errorlist {
+		margin: 0;
+		padding: 0;
+		display: inline;
+	}
+	#content fieldset div .errorlist li {
+		list-style: none;
+	}
+
+	#content fieldset .submit {
+		margin: 1em 0 0 1em;
+	}
+</style>
+{% endblock %}
+
+{% block status_message %}
+{% if no_settings %}
+<h3>** You must configure the settings before you can use Mail Engine**</h3>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<div id="contentTabs" style="display:none">
+	<ul>
+		<li><a href="#messages">Message List</a></li>
+		<li {% if no_settings or form.errors %}class="yui3-tab-selected"{% endif %}><a href="#settings">App Settings</a></li>
+	</ul>
+	<div>
+		<div id="messages">
+			<div id="messagePager"></div>
+			<div id="messageTable"></div>
+		</div>
+		<div id="settings">
+			<form method="post" action=".">
+				<fieldset>
+					<legend>* required</legend>
+
+					<div>
+						{{ form.auth_key.errors }}
+						<label for="id_auth_key">Auth Key*</label>
+						{{ form.auth_key }}
+						<em>Make it unique, keep it secret!</em>
+					</div>
+					
+					<div>
+						{{ form.default_sender.errors }}
+						<label for="id_default_sender">Default Sender Address*</label>
+						{{ form.default_sender }}
+					</div>
+					
+					<div>
+						{{ form.default_subject.errors }}
+						<label for="id_default_subject">Default Subject*</label>
+						{{ form.default_subject }}
+					</div>
+
+					<div>
+						{{ form.allowed_ips.errors }}
+						<label for="id_allowed_ips">Allowed IP Addresses</label>
+						{{ form.allowed_ips }}
+						<em>Comma separated list</em>
+					</div>
+
+					<input type="submit" value="Save" class="submit">
+				</fieldset>
+			</form>
+		</div>
+	</div>
+</div>
+
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+YUI().use('tabview', 'yui2-datatable', 'yui2-paginator', 'datasource-local', 'datasource-jsonschema', 'datatype-date', 'gallery-datasource-wrapper', 'io-base', function (Y) {
+	/** TEMP BUG FIX **/
+	Y.Tab.HTML_PARSER = {
+		selected : function (contentBox) {
+			if (this.get('boundingBox').hasClass('yui3-tab-selected')) {
+				return 2;
+			} else {
+				return 0;
+			}
+		}
+	};
+	/** END FIX **/
+
+	var tv = new Y.TabView({
+		srcNode : '#contentTabs',
+		render : true
+	});
+	Y.one('#contentTabs').setStyle('display', '');
+
+	Y.io('/messages', {
+		on : {
+			success: function(id, response) {
+				var ds = new Y.DataSource.Local({source : response.responseText});
+				ds.plug({
+					fn : Y.Plugin.DataSourceJSONSchema, 
+					cfg : {
+						schema : {
+							resultListLocator : 'list',
+							resultFields : ["subject", "sender", "body", "recipients", {key : "datetime", parser : Y.DataType.Date.parse}, "sent"],
+							metaFields : {
+								totalRecords : 'total'
+							}
+						}
+					}
+				});
+
+				var wrappedDS = new Y.DataSourceWrapper({
+					source : ds
+				});
+
+				function formatDate (cell, record, col, data) {
+					cell.innerHTML = Y.DataType.Date.format(data, {
+						format : '%D %T'
+					});
+				}
+
+				function formatSuccess (cell, record, col, data) {
+					cell.innerHTML = data ? '<span style="color:#0c0">&#10003;</span>' : '<span style="color:#c00">&#10007;</span>';
+				}
+
+				var cols = [
+					{key : 'datetime', label : 'Sent', formatter : formatDate},
+					{key : 'recipients', label : 'Sent To'},
+					{key : 'subject', label : 'Subject'},
+					{key : 'sender', label : 'Sender'},
+					{key : 'body', label : 'Message Body'},
+					{key : 'sent', label : 'Successfully Sent', formatter : formatSuccess}
+				];
+
+				var pager = new Y.YUI2.widget.Paginator({
+					containers : ['messagePager'],
+					rowsPerPage : 25
+				});
+
+				var dt = new Y.YUI2.widget.DataTable('messageTable', cols, wrappedDS, {
+					paginator : pager,
+					sortedBy : {
+						key : 'datetime',
+						dir : Y.YUI2.widget.DataTable.CLASS_DESC
+					}
+				});
+			}
+		}
+	});
+});
+</script> 
+{% endblock %}
