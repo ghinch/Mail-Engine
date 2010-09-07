@@ -2,7 +2,7 @@
 
 ## About
 
-Mail Engine is an application which allows you to run your own mail service application, with a REST interface and simple administration page, on Google App Engine. It is released under a BSD open source license for you to use in your own appliaction work.
+Mail Engine is an application which allows you to run your own email service application, with a REST interface and simple administration page, on Google App Engine. It is released under a BSD open source license for you to use in your own appliaction work.
 
 ## Installation
 
@@ -30,10 +30,11 @@ You will need to add a few settings before you can use Mail Engine:
 ## Usage
 
 Requests are send to Mail Engine via HTTP POST, to the url http://{app-name}.appspot.com/post. The following parameters should be sent:
-- recipients - Comma separated list of email addresses to receive the message
-- subject - The email subject
-- body - The email body
-- sender - The email address of the sender, which should be associated with the same App Engine account
+
+- recipients : Comma separated list of email addresses to receive the message
+- subject : The email subject
+- body : The email body
+- sender : The email address of the sender, which should be associated with the same App Engine account
 
 Additionally, for authentication, a token must be sent in the header of all requests named "Mail-Engine-Auth-Token". It will be a SHA1 hash of the key/values you've posted, in alphabetical order by key and url encoded, with the Auth Key you configured concated to the end. something like:
 	> hashlib.sha1(urllib.urlencode(PARAMS.sort()) + SECRET).hexdigest()
