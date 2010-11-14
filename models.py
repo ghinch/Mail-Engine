@@ -23,6 +23,8 @@ from utils import tasks
 
 import datetime
 import time
+import hashlib
+import random
 
 SIMPLE_TYPES = (int, long, float, bool, dict, basestring, list)
 
@@ -72,5 +74,14 @@ class Message(BaseModel):
 class Settings(BaseModel):
 	auth_key= db.StringProperty(required=True, default=ES)
 	allowed_ips = db.StringListProperty()
-	default_sender = db.StringProperty(required=True, default=ES)
-	default_subject = db.StringProperty(required=True, default=ES)
+	default_sender = db.StringProperty()
+	default_subject = db.StringProperty()
+
+	@classmethod
+	def reset_auth(self, key):
+		rn = random.random()
+		today = datetime.datetime.today()
+		hash = hashlib.sha1(str(rn) + today.isoformat()).hexdigest()
+
+		settings = Settings.get_or_insert(key_name=key, auth_key=hash)
+		return settings

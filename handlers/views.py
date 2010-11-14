@@ -26,6 +26,9 @@ class Admin(webapp.RequestHandler):
 		if current_settings:
 			current_settings = current_settings.to_dict()
 			current_settings['allowed_ips'] = ','.join(current_settings['allowed_ips'])
+		else:
+			current_settings = Settings.reset_auth(config.SETTINGS_KEY);
+
 		if form is None:
 			form = SettingsForm(current_settings)
 

@@ -85,10 +85,8 @@
 					<legend>* required</legend>
 
 					<div>
-						{{ form.auth_key.errors }}
-						<label for="id_auth_key">Auth Key*</label>
-						{{ form.auth_key }}
-						<em>Make it unique, keep it secret!</em>
+						<label for="id_auth_key">Auth Key</label>
+						<span id="id_auth_key">{{ form.auth_key.data }}</span>
 					</div>
 					
 					<div>
