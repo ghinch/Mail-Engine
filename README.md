@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/ghinch/mail-engine.png?label=ready&title=Ready)](https://waffle.io/ghinch/mail-engine)
 # Mail Engine for App Engine
 
 ## About
